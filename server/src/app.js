@@ -4,7 +4,9 @@ const express    = require('express')
 const bodyParser = require('body-parser')
 const cors       = require('cors')
 const morgan     = require('morgan')
+const { sequelize }  = require('./models')
 
+const serverConfig = require('./config/server')
 const app = express()
 app.use(morgan('combined'))
 app.use(bodyParser.urlencoded({
@@ -13,17 +15,10 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json())
 app.use(cors())
 
-app.get('/status', (req, res) => {
-  res.send({
-    message: 'HelloWorld'
-  })
-})
+require('./routes')(app)
 
-app.post('/register', (req, res) => {
-  console.log(req.body)
-  res.send({
-    message: `Hello ${req.body.email}. Have fun`
+sequelize.sync()
+  .then(() => {
+    app.listen(serverConfig.port)
+    console.log(`Server started on port ${serverConfig.port}`)
   })
-})
-
-app.listen(process.env.PORT || 8081)
